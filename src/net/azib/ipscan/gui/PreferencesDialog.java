@@ -62,6 +62,7 @@ public class PreferencesDialog extends AbstractModalDialog {
 	private Button[] displayMethod;
 	private Button showInfoCheckbox;
 	private Button askConfirmationCheckbox;
+	private Button autoStartScanCheckbox;
 	private Button versionCheckCheckbox;
 	private Button allowReports;
 	private Combo languageCombo;
@@ -274,6 +275,13 @@ public class PreferencesDialog extends AbstractModalDialog {
 		showInfoCheckbox = new Button(showStatsGroup, SWT.CHECK);
 		showInfoCheckbox.setText(Labels.getLabel("preferences.display.confirmation.showInfo"));
 
+		var startupGroup = new Group(displayTab, SWT.NONE);
+		startupGroup.setLayout(groupLayout);
+		startupGroup.setText(Labels.getLabel("preferences.startup"));
+
+		autoStartScanCheckbox = new Button(startupGroup, SWT.CHECK);
+		autoStartScanCheckbox.setText(Labels.getLabel("preferences.startup.autoStartScan"));
+
 		groupLayout = new GridLayout();
 		groupLayout.numColumns = 2;
 		
@@ -388,6 +396,7 @@ public class PreferencesDialog extends AbstractModalDialog {
 		displayMethod[guiConfig.displayMethod.ordinal()].setSelection(true);
 		showInfoCheckbox.setSelection(guiConfig.showScanStats);
 		askConfirmationCheckbox.setSelection(guiConfig.askScanConfirmation);
+		autoStartScanCheckbox.setSelection(guiConfig.autoStartScan);
 		versionCheckCheckbox.setSelection(guiConfig.versionCheckEnabled);
 		allowReports.setSelection(globalConfig.allowReports);
 		for (var i = 0; i < Labels.LANGUAGES.length; i++) {
@@ -428,6 +437,7 @@ public class PreferencesDialog extends AbstractModalDialog {
 		}
 		guiConfig.showScanStats = showInfoCheckbox.getSelection();
 		guiConfig.askScanConfirmation = askConfirmationCheckbox.getSelection();
+		guiConfig.autoStartScan = autoStartScanCheckbox.getSelection();
 		guiConfig.versionCheckEnabled = versionCheckCheckbox.getSelection();
 		globalConfig.allowReports = allowReports.getSelection();
 		var newLanguage = Labels.LANGUAGES[languageCombo.getSelectionIndex()];
