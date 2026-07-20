@@ -33,12 +33,12 @@ public class OpenerLaunchFetcher extends AbstractFetcher {
 
 	public Object scan(ScanningSubject subject) {
 		try {
-			// the cell shows a centered triangle character; it launches the default Opener on click
+			// the cell shows a centered triangle character only when a per-IP Opener is assigned;
+			// it launches the default Opener on click. Rows without an assigned Opener show nothing.
 			var ip = subject.getAddress().getHostAddress();
 			return defaultOpenerConfig.get(ip) != null ? "▶" : "";
 		}
 		catch (Exception e) {
-			// never let a failure here produce a "n/s" (NotScanned) cell
 			return "";
 		}
 	}

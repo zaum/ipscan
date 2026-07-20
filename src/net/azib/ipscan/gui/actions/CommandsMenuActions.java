@@ -15,6 +15,7 @@ import net.azib.ipscan.fetchers.CommentFetcher;
 import net.azib.ipscan.fetchers.Fetcher;
 import net.azib.ipscan.fetchers.FetcherRegistry;
 import net.azib.ipscan.fetchers.OpenerColumnFetcher;
+import net.azib.ipscan.fetchers.OpenerLaunchFetcher;
 import net.azib.ipscan.gui.DetailsWindow;
 import net.azib.ipscan.gui.EditOpenersDialog;
 import net.azib.ipscan.gui.ResultTable;
@@ -100,7 +101,7 @@ public class CommandsMenuActions {
 					var order = resultTable.getColumnOrder();
 					var modelCol = (order != null && col < order.length) ? order[col] : col;
 					var clickedId = ((Fetcher) resultTable.getColumn(modelCol).getData()).getId();
-					if (CommentFetcher.ID.equals(clickedId) || OpenerColumnFetcher.ID.equals(clickedId)) return;
+					if (CommentFetcher.ID.equals(clickedId) || OpenerColumnFetcher.ID.equals(clickedId) || OpenerLaunchFetcher.ID.equals(clickedId)) return;
 				}
 			}
 
@@ -351,7 +352,7 @@ public class CommandsMenuActions {
 			for (var i : resultTable.getSelectionIndices()) {
 				var ip = resultTable.getScanningResults().getResult(i).getAddress().getHostAddress();
 				defaultOpenerConfig.set(ip, openerName);
-				resultTable.updateResult(i, OpenerColumnFetcher.ID, openerName);
+				resultTable.updateOpenerAssignment(i, openerName);
 			}
 		}
 	}

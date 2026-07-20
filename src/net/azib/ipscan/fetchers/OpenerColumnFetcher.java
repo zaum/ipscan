@@ -33,6 +33,8 @@ public class OpenerColumnFetcher extends AbstractFetcher {
 	public Object scan(ScanningSubject subject) {
 		var ip = subject.getAddress().getHostAddress();
 		var openerName = defaultOpenerConfig.get(ip);
-		return openerName != null ? openerName : "—";
+		if (openerName != null) return openerName;
+		// no per-IP default Opener configured
+		return "—";
 	}
 }
