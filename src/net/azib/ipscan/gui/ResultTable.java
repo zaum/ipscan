@@ -10,6 +10,7 @@ import net.azib.ipscan.config.DefaultOpenerConfig;
 import net.azib.ipscan.config.GUIConfig;
 import net.azib.ipscan.config.Labels;
 import net.azib.ipscan.config.OpenersConfig;
+import net.azib.ipscan.config.Platform;
 import net.azib.ipscan.core.ScanningResult;
 import net.azib.ipscan.core.ScanningResult.ResultType;
 import net.azib.ipscan.core.ScanningResultList;
@@ -35,6 +36,7 @@ import net.azib.ipscan.gui.actions.ToolsActions;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.internal.win32.OS;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
@@ -88,6 +90,7 @@ import static net.azib.ipscan.gui.util.LayoutHelper.icon;
 
 		setHeaderVisible(true);
 		setLinesVisible(true);
+		styleHeaderBackground();
 
 		this.columnClickListener = columnClickListener;
 		this.columnResizeListener = columnResizeListener;
@@ -128,6 +131,16 @@ import static net.azib.ipscan.gui.util.LayoutHelper.icon;
 
 		// listen to state machine events
 		stateMachine.addTransitionListener(this);
+	}
+
+	private void styleHeaderBackground() {
+		if (!Platform.WINDOWS) return;
+		try {
+			long hwndHeader = OS.SendMessage(handle, OS.LVM_GETHEADER, 0, 0);
+			if (hwndHeader != 0) {
+				OS.SendMessage(hwndHeader, 0x1209 /* HDM_SETBKCOLOR */, 0, 0x00F0F0F0);
+			}
+		} catch (Throwable ignored) {}
 	}
 
 	/**
