@@ -75,6 +75,8 @@ import static net.azib.ipscan.gui.util.LayoutHelper.icon;
 	private final AtomicBoolean launching = new AtomicBoolean(false);
 	private static final int LAUNCH_COOLDOWN_MS = 1500;
 
+	private int[] columnFetcherIndexMap;
+
 	/** custom header hover tooltip (width-capped, wrapping) */
 	private Shell tooltipShell;
 	private Text tooltipLabel;
@@ -222,6 +224,14 @@ import static net.azib.ipscan.gui.util.LayoutHelper.icon;
 			});
 		}
 
+		// precompute column-to-fetcher-index mapping for fast virtual-table rendering
+		var colCount = getColumnCount();
+		columnFetcherIndexMap = new int[colCount];
+		for (var c = 0; c < colCount; c++) {
+			var f = (Fetcher) getColumn(c).getData();
+			columnFetcherIndexMap[c] = scanningResults.getFetcherIndex(f.getId());
+		}
+
 		// force the (still present) rows to be re-rendered with the new column set
 		clearAll();
 
@@ -241,38 +251,42 @@ import static net.azib.ipscan.gui.util.LayoutHelper.icon;
 	private void populateNewFetcher(Fetcher fetcher) {
 		var results = scanningResults;
 		var fetcherId = fetcher.getId();
+		final var batchSize = 100;
 		new Thread(() -> {
 			try {
-				// best-effort initialization (some fetchers read config in init)
 				try { fetcher.init(null); } catch (Exception ignored) {}
-				for (var i = 0; i < results.getItemCount(); i++) {
-					var result = results.getResult(i);
-					if (result == null || !result.isReady()) continue;
-					try {
-						var subject = new ScanningSubject(result.getAddress());
-						// some fetchers (e.g. Comment) need the MAC, which is known after scanning
-						if (result.getMac() != null)
-							subject.setParameter(MACFetcher.ID, result.getMac());
-						var value = fetcher.scan(subject);
-						var index = results.getFetcherIndex(fetcherId);
-						if (index >= 0 && index < result.getValues().size())
-							result.setValue(index, value);
-						final var row = i;
-						final var finalValue = value;
+				var total = results.getItemCount();
+				var position = results.getFetcherIndex(fetcherId);
+				for (var batchStart = 0; batchStart < total; batchStart += batchSize) {
+					var batchEnd = Math.min(batchStart + batchSize, total);
+					for (var i = batchStart; i < batchEnd; i++) {
+						var result = results.getResult(i);
+						if (result == null || !result.isReady()) continue;
+						try {
+							var subject = new ScanningSubject(result.getAddress());
+							if (result.getMac() != null)
+								subject.setParameter(MACFetcher.ID, result.getMac());
+							var value = fetcher.scan(subject);
+							if (position >= 0 && position < result.getValues().size())
+								result.setValue(position, value);
+						}
+						catch (Exception e) { }
+					}
+					final var start = batchStart;
+					final var end = batchEnd;
 					getDisplay().asyncExec(() -> {
 						if (isDisposed()) return;
-						try { updateResult(row, fetcherId, finalValue); }
+						try {
+							setRedraw(false);
+							for (var r = start; r < end; r++)
+								clear(r);
+							setRedraw(true);
+						}
 						catch (Exception ignored) {}
 					});
-					}
-					catch (Exception e) {
-						// skip this IP if the fetcher fails, continue with the rest
-					}
 				}
 			}
-			catch (Exception e) {
-				// never let an exception in the background thread break anything
-			}
+			catch (Exception e) { }
 		}, "FetcherPopulator-" + fetcherId).start();
 	}
 
@@ -445,17 +459,17 @@ import static net.azib.ipscan.gui.util.LayoutHelper.icon;
 			// visual position is given by getColumnOrder(); we must map them accordingly.
 			var order = getColumnOrder();
 			var columnCount = getColumnCount();
+			var indexMap = columnFetcherIndexMap;
 			for (var c = 0; c < columnCount; c++) {
 				var modelCol = (order != null && c < order.length) ? order[c] : c;
 				var fetcher = (Fetcher) getColumn(modelCol).getData();
-				var fetcherIndex = scanningResults.getFetcherIndex(fetcher.getId());
+				var fetcherIndex = indexMap[modelCol];
 				String text = "";
 				if (fetcherIndex >= 0 && fetcherIndex < values.size()) {
 					var value = values.get(fetcherIndex);
 					if (value != null)
 						text = value.toString();
 				}
-				// the Opener Launch column only shows the triangle when an Opener is assigned to this row
 				if (OpenerLaunchFetcher.ID.equals(fetcher.getId())) {
 					var ip = scanningResult.getAddress().getHostAddress();
 					text = defaultOpenerConfig.get(ip) != null ? "▶" : "";

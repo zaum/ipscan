@@ -281,11 +281,16 @@ public class ScanningResultList implements Iterable<ScanningResult> {
 		var oldOrder = new ArrayList<Fetcher>(selectedFetchers);
 		selectedFetchers = new ArrayList<>(newSelected);
 
+		var posMap = new int[newSelected.size()];
+		for (var i = 0; i < newSelected.size(); i++) {
+			posMap[i] = oldOrder.indexOf(newSelected.get(i));
+		}
+
 		for (var result : resultList) {
 			var oldValues = result.getValues();
 			var newValues = new Object[newSelected.size()];
 			for (var i = 0; i < newSelected.size(); i++) {
-				var oldPos = oldOrder.indexOf(newSelected.get(i));
+				var oldPos = posMap[i];
 				if (oldPos >= 0 && oldPos < oldValues.size())
 					newValues[i] = oldValues.get(oldPos);
 				else
