@@ -643,7 +643,6 @@ import static net.azib.ipscan.gui.util.LayoutHelper.icon;
 		if (result == null) return;
 
 		var ip = result.getAddress().getHostAddress();
-		// only accept the click if an Opener is assigned to this row
 		var openerName = defaultOpenerConfig.get(ip);
 		if (openerName == null) return;
 

@@ -58,7 +58,9 @@ public class DefaultOpenerConfig {
 	}
 
 	public String get(String ip) {
-		return defaults.getProperty(ip);
+		var openerName = defaults.getProperty(ip);
+		if (openerName != null) return openerName;
+		return Labels.getInstance().get("opener.ping");
 	}
 
 	public void set(String ip, String openerName) {
