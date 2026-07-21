@@ -49,8 +49,12 @@ public class StatisticsDialog extends InfoDialog {
 		var text = new StringBuilder();
 		text.append(Labels.getLabel("text.scan.time.total"))
 			.append(timeToText(scanInfo.getScanTime())).append(ln);
-		text.append(Labels.getLabel("text.scan.time.average"))
-			.append(timeToText((double)scanInfo.getScanTime() / scanInfo.getHostCount())).append(ln);
+		text.append(Labels.getLabel("text.scan.time.average"));
+		if (scanInfo.getHostCount() > 0)
+			text.append(timeToText((double)scanInfo.getScanTime() / scanInfo.getHostCount()));
+		else
+			text.append("N/A");
+		text.append(ln);
 		
 		text.append(ln).append(scanningResults.getFeederName()).append(ln)
 			.append(scanningResults.getFeederInfo()).append(ln).append(ln);
