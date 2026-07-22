@@ -81,6 +81,8 @@ import static net.azib.ipscan.gui.util.LayoutHelper.icon;
 	private Shell tooltipShell;
 	private Text tooltipLabel;
 
+	private Menu rowContextMenu;
+
 	public ResultTable(Shell parent, GUIConfig guiConfig, FetcherRegistry fetcherRegistry, CommentsConfig commentsConfig,
 							   ScanningResultList scanningResultList, StateMachine stateMachine,
 							   ColumnsActions.ColumnClick columnClickListener, ColumnsActions.ColumnResize columnResizeListener,
@@ -710,9 +712,15 @@ import static net.azib.ipscan.gui.util.LayoutHelper.icon;
 			try {
 				// event.x/event.y are display-relative; convert to table-relative coordinates
 				var tableLoc = toControl(event.x, event.y);
-				// if the right-click is on the header, use the column visibility menu; otherwise keep the row menu
+				// if the right-click is on the header, use the column visibility menu; otherwise restore the row menu
 				if (tableLoc.y <= getHeaderHeight()) {
-					setMenu(columnVisibilityMenu);
+					if (getMenu() != columnVisibilityMenu) {
+						rowContextMenu = getMenu();
+						setMenu(columnVisibilityMenu);
+					}
+				}
+				else if (rowContextMenu != null && getMenu() != rowContextMenu) {
+					setMenu(rowContextMenu);
 				}
 				// else: leave whatever row context menu MainWindow assigned via setMenu()
 			}
