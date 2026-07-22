@@ -7,3 +7,4 @@
 /lib/*src.zip
 .DS_Store
 *.jar
+hs_err_pid*.log
