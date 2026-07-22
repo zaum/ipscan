@@ -725,7 +725,7 @@ import static net.azib.ipscan.gui.util.LayoutHelper.icon;
 		private int lastCol = -1;
 		private long headerEntryTime;
 		private static final int POLL_INTERVAL = 100;
-		private static final int DELAY_MS = 400;
+		private static final int DELAY_MS = 2000;
 
 		HeaderTooltipPoller() {
 			getDisplay().timerExec(POLL_INTERVAL, this);
@@ -751,6 +751,13 @@ import static net.azib.ipscan.gui.util.LayoutHelper.icon;
 
 		private void poll() {
 			var display = getDisplay();
+			var parentShell = getShell();
+			if (display.getActiveShell() != parentShell) {
+				hideTooltip();
+				lastCol = -1;
+				headerEntryTime = 0;
+				return;
+			}
 			var cursorPos = display.getCursorLocation();
 			var sz = getSize();
 			if (sz.x <= 0 || sz.y <= 0) return;

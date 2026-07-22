@@ -3,6 +3,7 @@
 /test-coverage
 /.gradle
 /build
+/bin
 /lib/*src.zip
 .DS_Store
 *.jar
