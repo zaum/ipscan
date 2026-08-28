@@ -13,7 +13,7 @@ import net.azib.ipscan.core.net.Pinger;
 import net.azib.ipscan.core.net.PingerRegistry;
 import net.azib.ipscan.core.values.IntegerWithUnit;
 import net.azib.ipscan.feeders.Feeder;
-import net.azib.ipscan.gui.fetchers.PingFetcherPrefs;
+
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -53,7 +53,7 @@ public class PingFetcher extends AbstractFetcher {
 	
 	@Override
 	public Class<? extends FetcherPrefs> getPreferencesClass() {
-		return PingFetcherPrefs.class;
+		return null;
 	}
 
 	protected PingResult executePing(ScanningSubject subject) {

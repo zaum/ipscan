@@ -1,0 +1,606 @@
+/*
+ * Cyberpunk theme for Angry IP Scanner (JavaFX)
+ */
+
+.root {
+    -fx-void: #05060a;
+    -fx-panel: #0a0e18;
+    -fx-panel-2: #0d1424;
+    -fx-line: rgba(47,230,217,0.22);
+    -fx-line-strong: rgba(47,230,217,0.42);
+    -fx-cyan: #2FE6D9;
+    -fx-cyan-dim: #1B8F87;
+    -fx-magenta: #FF3EC9;
+    -fx-amber: #FFB020;
+    -fx-red: #FF4757;
+    -fx-green: #3CFF9E;
+    -fx-text-hi: #E8F4F8;
+    -fx-text-dim: #6B8390;
+
+    -fx-background-color: -fx-void;
+    -fx-font-family: 'JetBrains Mono', 'Consolas', 'Courier New';
+    -fx-font-size: 12;
+}
+
+/* Main stage */
+.main-stage {
+    -fx-background-color: -fx-void;
+}
+
+/* Title bar area */
+.title-bar {
+    -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, #0d1730, #0a0e18);
+    -fx-border-color: -fx-line;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10 18;
+    -fx-alignment: center-left;
+    -fx-spacing: 10;
+}
+
+.title-glyph {
+    -fx-background-color: -fx-panel-2;
+    -fx-border-color: -fx-cyan;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-min-width: 20;
+    -fx-min-height: 20;
+    -fx-max-width: 20;
+    -fx-max-height: 20;
+}
+
+.title-glyph-dot {
+    -fx-fill: -fx-cyan;
+    -fx-effect: dropshadow(gaussian, #2FE6D9, 8, 1, 0, 0);
+}
+
+.title-label {
+    -fx-font-family: 'Chakra Petch';
+    -fx-text-fill: -fx-cyan;
+    -fx-font-size: 14;
+    -fx-effect: dropshadow(gaussian, #2FE6D9, 10, 0.5, 0, 0);
+}
+
+.title-winctl {
+    -fx-spacing: 7;
+    -fx-alignment: center-right;
+}
+
+.title-winctl .dot-amber {
+    -fx-fill: -fx-amber;
+    -fx-effect: dropshadow(gaussian, #FFB020, 6, 1, 0, 0);
+}
+.title-winctl .dot-cyan {
+    -fx-fill: -fx-cyan;
+    -fx-effect: dropshadow(gaussian, #2FE6D9, 6, 1, 0, 0);
+}
+.title-winctl .dot-magenta {
+    -fx-fill: -fx-magenta;
+    -fx-effect: dropshadow(gaussian, #FF3EC9, 6, 1, 0, 0);
+}
+
+/* Menu bar */
+.menu-bar {
+    -fx-background-color: -fx-panel-2;
+    -fx-border-color: -fx-line;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 6 18;
+}
+
+.menu-bar .menu {
+    -fx-padding: 4 11;
+}
+
+.menu-bar .label {
+    -fx-font-family: 'Chakra Petch', 'Segoe UI', 'Arial';
+    -fx-text-fill: -fx-text-dim;
+    -fx-font-size: 11;
+    -fx-font-weight: 600;
+}
+
+.menu-bar .menu:showing .label,
+.menu-bar .menu:hover .label {
+    -fx-text-fill: -fx-cyan;
+}
+
+.menu-bar .menu:showing {
+    -fx-background-color: -fx-panel;
+}
+
+.menu .menu-item {
+    -fx-background-color: -fx-panel;
+    -fx-text-fill: -fx-text-hi;
+    -fx-font-family: 'JetBrains Mono', 'Consolas', 'Courier New';
+    -fx-font-size: 11;
+    -fx-padding: 4 12;
+}
+
+.context-menu {
+    -fx-background-color: -fx-panel;
+    -fx-border-color: -fx-line;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 4;
+}
+
+.context-menu .menu-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: #E8F4F8;
+    -fx-font-family: 'JetBrains Mono', 'Consolas', 'Courier New';
+    -fx-font-size: 11;
+}
+
+.context-menu .menu-item:focused {
+    -fx-background-color: rgba(47,230,217,0.15);
+    -fx-text-fill: #2FE6D9;
+}
+
+.menu .menu-item:focused {
+    -fx-background-color: rgba(47,230,217,0.12);
+}
+
+.menu .menu-item .label {
+    -fx-text-fill: -fx-text-hi;
+    -fx-font-family: 'JetBrains Mono', 'Consolas', 'Courier New';
+    -fx-font-size: 11;
+}
+
+.menu .menu-item:disabled .label {
+    -fx-text-fill: -fx-text-dim;
+}
+
+/* Controls bar */
+.controls-bar {
+    -fx-background-color: -fx-panel;
+    -fx-border-color: -fx-line;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 12 18;
+    -fx-spacing: 10;
+    -fx-alignment: center-left;
+}
+
+.controls-label {
+    -fx-font-size: 9.5;
+    -fx-text-fill: -fx-text-dim;
+    -fx-font-family: 'Chakra Petch', 'Segoe UI', 'Arial';
+    -fx-font-weight: 600;
+}
+
+.controls-field {
+    -fx-background-color: #060911;
+    -fx-border-color: -fx-line;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 7 10;
+    -fx-font-size: 12;
+    -fx-text-fill: -fx-text-hi;
+    -fx-font-family: 'JetBrains Mono', 'Consolas', 'Courier New';
+}
+
+.controls-field:focused {
+    -fx-border-color: -fx-cyan;
+    -fx-effect: dropshadow(gaussian, rgba(47,230,217,0.15), 8, 0, 0, 0);
+}
+
+.controls-combo {
+    -fx-background-color: #060911;
+    -fx-border-color: -fx-line;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 5 10;
+    -fx-font-size: 10.5;
+    -fx-text-fill: -fx-cyan-dim;
+    -fx-font-family: 'Chakra Petch', 'Segoe UI', 'Arial';
+    -fx-font-weight: 600;
+}
+
+.controls-combo .list-cell {
+    -fx-background-color: -fx-panel-2;
+    -fx-text-fill: -fx-text-hi;
+    -fx-font-family: 'JetBrains Mono', 'Consolas', 'Courier New';
+    -fx-font-size: 11;
+}
+
+.controls-combo .list-cell:hover {
+    -fx-background-color: rgba(47,230,217,0.1);
+}
+
+.controls-combo .list-cell:selected {
+    -fx-background-color: rgba(47,230,217,0.15);
+    -fx-text-fill: -fx-cyan;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: -fx-panel-2;
+    -fx-border-color: -fx-line;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.combo-box-popup .list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-hi;
+    -fx-font-family: 'JetBrains Mono', 'Consolas', 'Courier New';
+    -fx-font-size: 11;
+    -fx-padding: 4 10;
+}
+
+.combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: rgba(47,230,217,0.1);
+}
+
+.combo-box-popup .list-view .list-cell:filled:selected {
+    -fx-background-color: rgba(47,230,217,0.15);
+    -fx-text-fill: -fx-cyan;
+}
+
+.combo-box-popup .list-view .list-cell:selected {
+    -fx-background-color: rgba(47,230,217,0.15);
+    -fx-text-fill: -fx-cyan;
+}
+
+.combo-box-popup {
+    -fx-accent: rgba(47,230,217,0.15);
+}
+
+.prefs-button {
+    -fx-background-color: transparent;
+    -fx-border-color: -fx-line;
+    -fx-border-radius: 13;
+    -fx-background-radius: 13;
+    -fx-min-width: 26;
+    -fx-min-height: 26;
+    -fx-max-width: 26;
+    -fx-max-height: 26;
+    -fx-text-fill: -fx-text-dim;
+    -fx-font-size: 13;
+    -fx-cursor: hand;
+}
+
+.prefs-button:hover {
+    -fx-border-color: -fx-cyan;
+    -fx-text-fill: -fx-cyan;
+}
+
+/* Scan button */
+.scan-button {
+    -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, rgba(47,230,217,0.16), rgba(47,230,217,0.04));
+    -fx-border-color: -fx-cyan;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-text-fill: -fx-cyan;
+    -fx-font-family: 'Chakra Petch', 'Segoe UI', 'Arial';
+    -fx-font-weight: 700;
+    -fx-font-size: 12;
+    -fx-effect: dropshadow(gaussian, #2FE6D9, 10, 0.35, 0, 0);
+    -fx-padding: 10 24;
+    -fx-cursor: hand;
+}
+
+.scan-button:hover {
+    -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, rgba(47,230,217,0.26), rgba(47,230,217,0.08));
+    -fx-effect: dropshadow(gaussian, #2FE6D9, 18, 0.6, 0, 0);
+}
+
+/* Activity bar (scanline) */
+.activity-bar {
+    -fx-background-color: rgba(47,230,217,0.25);
+    -fx-min-height: 2;
+    -fx-max-height: 2;
+}
+
+.activity-bar-fill {
+    -fx-fill: linear-gradient(from 0% 0% to 100% 0%, transparent, -fx-cyan, transparent);
+}
+
+/* Table view */
+.table-view {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+    -fx-table-cell-border-color: transparent;
+    -fx-focus-color: transparent;
+    -fx-mark-color: #00E5FF;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #080b14;
+    -fx-padding: 0 0 0 0;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-border-color: -fx-line;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10 14;
+    -fx-size: 32;
+}
+
+.table-view .column-header .label {
+    -fx-font-family: 'Chakra Petch', 'Segoe UI', 'Arial';
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-text-dim;
+    -fx-font-size: 10;
+    -fx-alignment: baseline-left;
+    -fx-padding: 0 14 0 0;
+}
+
+/* auto-fit button column: no padding so the symbol is fully visible */
+.table-view .column-header.autofit-button {
+    -fx-padding: 0;
+}
+
+.table-view .column-header.autofit-button .label {
+    -fx-padding: 0;
+    -fx-font-size: 13;
+}
+
+.table-view .filler {
+    -fx-background-color: #080b14;
+}
+
+.table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(47,230,217,0.1);
+    -fx-border-width: 0 0 1 0;
+    -fx-text-fill: #E0ECF0;
+    -fx-font-size: 12;
+    -fx-padding: 2 14;
+    -fx-cell-size: 24;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: transparent;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: rgba(47,230,217,0.05);
+}
+
+.table-row-cell:selected {
+    -fx-background-color: rgba(80,90,100,0.25);
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.table-row-cell:selected .table-cell {
+    -fx-text-fill: #E8F4F8;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.table-view .table-cell {
+    -fx-padding: 2 14;
+    -fx-alignment: baseline-left;
+    -fx-text-fill: #E8F4F8;
+}
+
+/* Status bar */
+.status-bar {
+    -fx-background-color: #060911;
+    -fx-border-color: -fx-line;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 8 18;
+    -fx-font-size: 10;
+    -fx-text-fill: -fx-text-dim;
+    -fx-spacing: 16;
+    -fx-alignment: center-left;
+}
+
+.status-label {
+    -fx-font-size: 10;
+    -fx-text-fill: -fx-text-dim;
+    -fx-font-family: 'JetBrains Mono', 'Consolas', 'Courier New';
+}
+
+.status-value {
+    -fx-font-weight: 600;
+    -fx-text-fill: -fx-cyan;
+}
+
+.status-progress > .bar {
+    -fx-background-color: -fx-cyan;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-padding: 1;
+}
+
+.status-progress > .track {
+    -fx-background-color: rgba(47,230,217,0.08);
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-padding: 1;
+}
+
+/* Alive/dead dot in IP column */
+.status-dot {
+    -fx-min-width: 8;
+    -fx-min-height: 8;
+    -fx-max-width: 8;
+    -fx-max-height: 8;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+}
+
+.status-dot.unknown {
+    -fx-background-color: -fx-text-dim;
+}
+
+.status-dot.dead {
+    -fx-background-color: -fx-red;
+    -fx-effect: dropshadow(gaussian, #FF4757, 6, 0.5, 0, 0);
+}
+
+.status-dot.alive {
+    -fx-background-color: -fx-green;
+    -fx-effect: dropshadow(gaussian, #3CFF9E, 6, 0.5, 0, 0);
+}
+
+.status-dot.ports {
+    -fx-background-color: -fx-cyan;
+    -fx-effect: dropshadow(gaussian, #2FE6D9, 6, 0.5, 0, 0);
+}
+
+/* Ping text colors */
+.table-cell.ping-fast {
+    -fx-text-fill: -fx-green;
+    -fx-font-weight: 600;
+    -fx-alignment: baseline-right;
+}
+
+.table-cell.ping-moderate {
+    -fx-text-fill: -fx-amber;
+    -fx-font-weight: 600;
+    -fx-alignment: baseline-right;
+}
+
+.table-cell.ping-slow {
+    -fx-text-fill: -fx-red;
+    -fx-font-weight: 600;
+    -fx-alignment: baseline-right;
+}
+
+.text-dim {
+    -fx-text-fill: #4A5A64;
+}
+
+/* Feeder area */
+.feeder-area {
+    -fx-background-color: -fx-panel;
+    -fx-border-color: -fx-line;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 12 18;
+    -fx-spacing: 10;
+    -fx-alignment: center-left;
+}
+
+/* Feeder grid pane */
+.feeder-grid {
+    -fx-background-color: -fx-panel;
+    -fx-padding: 8 18;
+}
+
+/* Scrollbar styling */
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .track {
+    -fx-background-color: rgba(47,230,217,0.05);
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: rgba(47,230,217,0.2);
+    -fx-background-radius: 4;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: rgba(47,230,217,0.35);
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+/* Dialog base */
+.dialog-root {
+    -fx-background-color: -fx-panel;
+    -fx-border-color: -fx-line-strong;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+}
+
+.dialog-pane {
+    -fx-background-color: -fx-void;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: -fx-panel;
+}
+
+.dialog-pane .button-bar {
+    -fx-background-color: -fx-panel;
+}
+
+.dialog-pane .button {
+    -fx-background-color: -fx-panel-2;
+    -fx-border-color: -fx-line-strong;
+    -fx-border-radius: 4;
+    -fx-text-fill: -fx-text-hi;
+    -fx-font-family: 'JetBrains Mono', 'Consolas', 'Courier New';
+    -fx-padding: 6 18;
+}
+
+.dialog-title {
+    -fx-font-family: 'Chakra Petch', 'Segoe UI', 'Arial';
+    -fx-font-weight: 700;
+    -fx-text-fill: -fx-cyan;
+    -fx-font-size: 14;
+    -fx-effect: dropshadow(gaussian, #2FE6D9, 8, 0.4, 0, 0);
+}
+
+.dialog-button {
+    -fx-background-color: -fx-panel-2;
+    -fx-border-color: -fx-line-strong;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-text-fill: -fx-text-hi;
+    -fx-font-family: 'JetBrains Mono', 'Consolas', 'Courier New';
+    -fx-font-size: 11;
+    -fx-padding: 6 18;
+    -fx-cursor: hand;
+}
+
+.dialog-button:hover {
+    -fx-border-color: -fx-cyan;
+    -fx-text-fill: -fx-cyan;
+}
+
+.dialog-button:default {
+    -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, rgba(47,230,217,0.16), rgba(47,230,217,0.04));
+    -fx-border-color: -fx-cyan;
+    -fx-text-fill: -fx-cyan;
+    -fx-effect: dropshadow(gaussian, #2FE6D9, 8, 0.3, 0, 0);
+}
+
+/* Opener arrow */
+.opener-arrow {
+    -fx-text-fill: -fx-cyan;
+    -fx-font-size: 12;
+    -fx-cursor: hand;
+}
+
+.opener-arrow:hover {
+    -fx-effect: dropshadow(gaussian, #2FE6D9, 8, 0.5, 0, 0);
+}
+
+/* Context menus (IP↑ button, table column header, etc.) */
+.context-menu {
+    -fx-background-color: #0d1424;
+    -fx-border-color: -fx-line;
+    -fx-border-width: 1;
+    -fx-padding: 4 0;
+    -fx-font-family: 'JetBrains Mono', 'Consolas', 'Courier New';
+    -fx-font-size: 11;
+}
+
+.context-menu .menu-item {
+    -fx-background-color: transparent;
+    -fx-padding: 6 18;
+}
+
+.context-menu .menu-item .label {
+    -fx-text-fill: -fx-text-hi;
+}
+
+.context-menu .menu-item:focused {
+    -fx-background-color: rgba(47,230,217,0.12);
+}
+
+.context-menu .menu-item:focused .label {
+    -fx-text-fill: -fx-cyan;
+}

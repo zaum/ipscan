@@ -1,7 +1,6 @@
 package net.azib.ipscan.fetchers;
 
 import net.azib.ipscan.core.ScanningSubject;
-import net.azib.ipscan.gui.fetchers.MACFetcherPrefs;
 
 import java.util.regex.Pattern;
 
@@ -53,6 +52,6 @@ public abstract class MACFetcher extends AbstractFetcher {
 	}
 
 	@Override public Class<? extends FetcherPrefs> getPreferencesClass() {
-		return MACFetcherPrefs.class;
+		return null;
 	}
 }

@@ -1,7 +1,6 @@
 package net.azib.ipscan.config;
 
 import net.azib.ipscan.fetchers.Fetcher;
-import org.eclipse.swt.graphics.Point;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,11 +11,6 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/**
- * DimensionsConfigTest
- * 
- * @author Anton Keks
- */
 public class GUIConfigTest {
 
 	private Preferences preferences;
@@ -36,24 +30,26 @@ public class GUIConfigTest {
 
 	@Test
 	public void setMainWindowDimensions() throws Exception {
-		var size1 = new Point(2, 1);
-		config.setMainWindowSize(size1, false);
+		config.mainWindowSize = new int[] {2, 1};
+		config.isMainWindowMaximized = false;
 		assertFalse(config.isMainWindowMaximized);
-		assertEquals(size1, config.getMainWindowSize());
+		assertArrayEquals(new int[] {2, 1}, config.mainWindowSize);
 
-		var size2 = new Point(3, 4);
-		config.setMainWindowSize(size2, true);
+		config.mainWindowSize = new int[] {3, 4};
+		config.isMainWindowMaximized = true;
 		assertTrue(config.isMainWindowMaximized);
-		assertEquals(size1, config.getMainWindowSize());
+		assertArrayEquals(new int[] {3, 4}, config.mainWindowSize);
 	}
 
 	@Test
 	public void store() throws Exception {
-		config.setMainWindowSize(new Point(33, 44), false);
+		config.mainWindowSize = new int[] {33, 44};
+		config.isMainWindowMaximized = false;
 		config.store();
 		assertEquals(33, preferences.getInt("windowWidth", 0));
 
-		config.setMainWindowSize(new Point(55, 66), true);
+		config.mainWindowSize = new int[] {55, 66};
+		config.isMainWindowMaximized = true;
 		config.store();
 		assertEquals(33, preferences.getInt("windowWidth", 0));
 	}

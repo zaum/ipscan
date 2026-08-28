@@ -35,15 +35,19 @@ public class ComponentRegistry {
 		var i = new Injector();
 		new ConfigModule().register(i);
 		new ComponentRegistry().register(i);
+
+		// Always load pingers regardless of GUI
+		var pingerRegistry = i.require(PingerRegistry.class);
+		new PluginLoader().getClasses().forEach(c -> {
+			var plugin = i.require(c);
+			if (Pinger.class.isAssignableFrom(c))
+				pingerRegistry.register(plugin.getId(), (Class) c);
+		});
+
 		if (withGUI) {
-			new GUIRegistry().register(i);
-			var pingerRegistry = i.require(PingerRegistry.class);
-			new PluginLoader().getClasses().forEach(c -> {
-				var plugin = i.require(c);
-				if (Pinger.class.isAssignableFrom(c))
-					pingerRegistry.register(plugin.getId(), (Class) c);
-			});
+			// GUI components are registered by FXComponentRegistry in FXGUI.start()
 		}
+
 		return i;
 	}
 }

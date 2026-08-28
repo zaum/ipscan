@@ -9,7 +9,6 @@ import net.azib.ipscan.fetchers.Fetcher;
 import net.azib.ipscan.fetchers.HostnameFetcher;
 import net.azib.ipscan.fetchers.IPFetcher;
 import net.azib.ipscan.fetchers.PingFetcher;
-import org.eclipse.swt.graphics.Point;
 
 import java.util.prefs.Preferences;
 
@@ -40,6 +39,14 @@ public class GUIConfig {
 	}
 	
 	private void load() {
+		if (!preferences.getBoolean("windowHeightReset4", false)) {
+			preferences.remove("windowHeight");
+			preferences.putBoolean("windowHeightReset4", true);
+		}
+		if (!preferences.getBoolean("windowWidthReset", false)) {
+			preferences.remove("windowWidth");
+			preferences.putBoolean("windowWidthReset", true);
+		}
 		isFirstRun = preferences.getBoolean("firstRun", true);
 		versionCheckEnabled = preferences.getBoolean("versionCheckEnabled", true);
 		lastRunVersion = preferences.get("lastRunVersion", "Unknown");
@@ -51,7 +58,7 @@ public class GUIConfig {
 		autoStartScan = preferences.getBoolean("autoStartScan", false);
 
 		isMainWindowMaximized = preferences.getBoolean("windowMaximized", false);
-		mainWindowSize = new int[] {preferences.getInt("windowWidth", 800), preferences.getInt("windowHeight", 450)};
+		mainWindowSize = new int[] {preferences.getInt("windowWidth", 760), preferences.getInt("windowHeight", 640)};
 		mainWindowPosition = new int[] {preferences.getInt("windowX", 50), preferences.getInt("windowY", 85)};
 		detailsWindowSize = new int[] {preferences.getInt("detailsWidth", 400), preferences.getInt("detailsHeight", 300)};
 	}
@@ -78,36 +85,6 @@ public class GUIConfig {
 		
 		preferences.putInt("detailsWidth", detailsWindowSize[0]);
 		preferences.putInt("detailsHeight", detailsWindowSize[1]);
-	}
-
-	public Point getDetailsWindowSize() {
-		return new Point(detailsWindowSize[0], detailsWindowSize[1]);
-	}
-
-	public void setDetailsWindowSize(Point size) {
-		detailsWindowSize = new int[] {size.x, size.y};
-	}
-
-	public Point getMainWindowSize() {
-		return new Point(mainWindowSize[0], mainWindowSize[1]);
-	}
-
-	public void setMainWindowSize(Point size, boolean isMaximized) {
-		if (!isMaximized) {
-			mainWindowSize = new int[] {size.x, size.y};
-		}
-		isMainWindowMaximized = isMaximized;
-	}
-
-	public Point getMainWindowPosition(){
-		return new Point(mainWindowPosition[0], mainWindowPosition[1]);
-	}
-
-	public void setMainWindowPosition(Point position, boolean isMaximized){
-		if (!isMaximized) {
-			mainWindowPosition = new int[] {position.x, position.y};
-		}
-		isMainWindowMaximized = isMaximized;
 	}
 
 	/**
@@ -149,5 +126,13 @@ public class GUIConfig {
 	 */
 	public void setColumnOrder(String[] fetcherIds) {
 		preferences.put("columnOrder", String.join(",", fetcherIds));
+	}
+
+	public String getFeederData(String feederId) {
+		return preferences.get("feederData." + feederId, null);
+	}
+
+	public void setFeederData(String feederId, String data) {
+		preferences.put("feederData." + feederId, data);
 	}
 }

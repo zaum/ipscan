@@ -1,0 +1,5 @@
+task classpathInfo {
+    doLast {
+        configurations.runtimeClasspath.each { println it }
+    }
+}

@@ -11,7 +11,6 @@ import net.azib.ipscan.core.ScanningResult.ResultType;
 import net.azib.ipscan.core.ScanningSubject;
 import net.azib.ipscan.core.values.NotScanned;
 import net.azib.ipscan.core.values.NumericRangeList;
-import net.azib.ipscan.gui.fetchers.PortsFetcherPrefs;
 import net.azib.ipscan.util.SequenceIterator;
 import net.azib.ipscan.util.ThreadResourceBinder;
 
@@ -60,7 +59,7 @@ public class PortsFetcher extends AbstractFetcher {
 	
 	@Override
 	public Class<? extends FetcherPrefs> getPreferencesClass() {
-		return PortsFetcherPrefs.class;
+		return null;
 	}
 
 	/**

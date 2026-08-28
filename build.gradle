@@ -9,6 +9,12 @@ buildscript {
 
 plugins {
     id "java"
+    id "org.openjfx.javafxplugin" version "0.1.0"
+}
+
+javafx {
+    version = "21"
+    modules = ["javafx.controls", "javafx.base", "javafx.graphics"]
 }
 
 def osName = System.getProperty("os.name")
@@ -31,7 +37,8 @@ version = exec("git describe --tags", ".", false) ?: "unknown"
 
 java.sourceCompatibility = java.targetCompatibility = 21
 
-def javaModules = ["java.base", "java.prefs", "java.logging", "jdk.crypto.ec"]
+def javaModules = ["java.base", "java.prefs", "java.logging", "jdk.crypto.ec", "java.desktop",
+    "javafx.controls", "javafx.base", "javafx.graphics"]
 project.ext.set("javaModules", javaModules)
 
 sourceSets {
@@ -57,20 +64,17 @@ configurations {
     macX86
     macArm64
 
-    // compile and test with current platform's SWT and JNA
+    // compile and test with current platform's JavaFX and JNA
     compileOnly.extendsFrom(getAt(platform), jna)
     testImplementation.extendsFrom(compileOnly)
     runtimeClasspath.extendsFrom(compileOnly)
-    all*.exclude module: 'org.eclipse.swt' // transitive dependency in Maven that fails
 }
 
 dependencies {
-    def swtVersion = '3.134.0'
-    linux64 "org.eclipse.platform:org.eclipse.swt.gtk.linux.x86_64:${swtVersion}"
-    win64 "org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64:${swtVersion}"
-    macX86 "org.eclipse.platform:org.eclipse.swt.cocoa.macosx.x86_64:${swtVersion}"
-    macArm64 "org.eclipse.platform:org.eclipse.swt.cocoa.macosx.aarch64:${swtVersion}"
     jna 'net.java.dev.jna:jna:5.9.0'
+    def javafxVersion = "21"
+    def os = System.getProperty('os.name').contains('Windows') ? 'win' : System.getProperty('os.name').contains('Linux') ? 'linux' : 'mac'
+    // SWT removed
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:2.23.0'
 }
@@ -85,18 +89,6 @@ test {
     }
 }
 
-def getSwtManifestAttributes(File swtJar) {
-    def jarFile = new java.util.jar.JarFile(swtJar)
-    def manifest = jarFile.manifest
-    def attrs = manifest.mainAttributes
-
-    def swtOs = attrs.getValue("SWT-OS")
-    def swtArch = attrs.getValue("SWT-ARCH")
-
-    jarFile.close()
-    return [swtOs, swtArch]
-}
-
 def packageTask(String platform, Closure doMore) {
     return tasks.create(platform, Jar) {
         dependsOn = ['classes']
@@ -104,61 +96,27 @@ def packageTask(String platform, Closure doMore) {
            attributes 'Implementation-Title': 'Angry IP Scanner',
                'Implementation-Version': version,
                'Main-Class': 'net.azib.ipscan.Main',
-               'Class-Path': platform == "any" ? "/usr/share/java/swt4.jar /usr/lib/eclipse/swt.jar ./" : "./",
+               'Class-Path': "./",
                'Title': 'Angry IP Scanner',
                'Version': version,
                'Build-Date': java.time.LocalDate.now().toString(),
                'URL': 'https://angryip.org/'
-
-            if (platform != "any") {
-                def swtJar = configurations[platform].files.find { file ->
-                    file.name.contains("swt")
-                }
-                def (swtOs, swtArch) = getSwtManifestAttributes(swtJar)
-                if (swtOs && swtArch) {
-                    attributes(
-                            'SWT-OS': swtOs,
-                            'SWT-ARCH': swtArch
-                    )
-                }
-            }
         }
 
         archiveFileName.set("${project.name}-${version}-${platform == 'win64' ? 'win' : platform}.jar")
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         from {
-           configurations[platform].collect {
+           (configurations[platform] + configurations.runtimeClasspath).collect {
                it.isDirectory() ? it : zipTree(it)
            }
         }
         exclude(
            'images/**/*.svg',
-           'META-INF/ECLIPSE*',
-           'about_files/*',
-           'version.txt',
-           '.api_description',
-           'about.html',
-           'fragment.properties',
-           'chrome.manifest',
-           // Linux/GTK
-           'libswt-awt-gtk-*.so',
-           'libswt-glx-gtk-*.so',
-           'libswt-webkit-gtk-*.so',
-           'webkitextensions*/*',
-           // Win32
-           'swt-awt-*.dll',
-           'swt-wgl-*.dll',
-           'swt-gdip-*.dll',
-           'swt-webkit-*.dll',
-           // Mac
-           'libswt-awt-*.jnilib',
-            // JNA
+            // JNA platform-specific natives
             'com/sun/jna/*/*.a',
             'com/sun/jna/*/*.so',
             'com/sun/jna/*/*.jnilib',
-            "com/sun/jna/win32-${platform == 'win32' ? 'x86-64' : platform == 'win64' ? 'x86' : '*'}/*.dll",
-            // Win-specific stuff
-            !platform.startsWith('win') ? 'net/azib/ipscan/core/net/Win*' : '',
-            !platform.startsWith('win') ? 'net/azib/ipscan/fetchers/Win*' : ''
+            "com/sun/jna/win32-${platform == 'win32' ? 'x86-64' : platform == 'win64' ? 'x86' : '*'}/*.dll"
         )
         with jar
 
@@ -174,13 +132,12 @@ def minimizeTask(String platform, Closure doMore) {
     return tasks.create("${platform}.min", proguard.gradle.ProGuardTask) {
         injars "build/libs/${project.name}-${version}-${suffix}.jar"
         outjars "build/libs/${project.name}-${version}-${suffix}.min.jar"
-        (project.ext.javaModules + "java.desktop").each {
+        (project.ext.javaModules).each {
             libraryjars System.getProperty('java.home') + "/jmods/${it}.jmod"
         }
         dontobfuscate
         dontoptimize
         dontnote '**'
-        configuration 'ext/swt.pro'
         configuration 'ext/jna.pro'
 
         def keepClasses = [
@@ -304,7 +261,7 @@ def jlink(String target, String jrePath, String extraOpts = System.getenv("JLINK
     def jreDir = new File(target, jrePath)
     if (!jreDir.exists()) {
         jreDir.getParentFile().mkdirs()
-        exec("jlink --output $jrePath $extraOpts --vm=client --compress=2 --no-header-files --no-man-pages --strip-debug --add-modules " + javaModules.join(","), target)
+        exec("jlink --output $jrePath $extraOpts --compress=zip-6 --no-header-files --no-man-pages --strip-debug --add-modules " + javaModules.join(","), target)
         ant.delete(dir: new File(jreDir, "legal"))
     }
 }

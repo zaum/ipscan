@@ -5,11 +5,10 @@
  */
 package net.azib.ipscan;
 
+import javafx.application.Application;
 import net.azib.ipscan.config.*;
 import net.azib.ipscan.di.Injector;
-import net.azib.ipscan.gui.GUI;
-import net.azib.ipscan.gui.InfoDialog;
-import net.azib.ipscan.gui.MacApplicationMenu;
+import net.azib.ipscan.gui.fx.FXGUI;
 import net.azib.ipscan.util.GoogleAnalytics;
 
 import java.io.File;
@@ -35,18 +34,10 @@ public class Main {
 
 	/**
 	 * The launcher
-	 * <p/>
-	 * In development, pass the following on the JVM command line:
-	 * <tt>-Djava.util.logging.config.file=config/logging.properties</tt>
-	 * <p/>
-	 * On Mac, add the following (otherwise SWT won't work):
-	 * <tt>-XstartOnFirstThread</tt>
 	 */
 	public static void main(String... args) {
-		GUI gui = null;
 		try {
 			var startTime = System.currentTimeMillis();
-			gui = new GUI();
 			disableDNSCache();
 
 			var locale = Config.getConfig().getLocale();
@@ -54,15 +45,15 @@ public class Main {
 			LOG.finer("Labels and Config initialized after " + (System.currentTimeMillis() - startTime));
 
 			var injector = new ComponentRegistry().init();
-			if (Platform.MAC_OS) injector.require(MacApplicationMenu.class);
 			LOG.finer("Components initialized after " + (System.currentTimeMillis() - startTime));
 
 			processCommandLine(args, injector);
 
-			gui.showMainWindow(injector, args.length == 0);
+			// Launch JavaFX GUI
+			FXGUI.init(injector, args.length == 0);
+			Application.launch(FXGUI.class, args);
 
 			Config.getConfig().store();
-			gui.close();
 		}
 		catch (UnsatisfiedLinkError e) {
 			e.printStackTrace();
@@ -77,23 +68,11 @@ public class Main {
 				} catch (Exception ignore) {}
 			}
 		}
-		catch (NoClassDefFoundError e) {
+		catch (Throwable e) {
 			e.printStackTrace();
 			new GoogleAnalytics().report(e);
-			showFallbackError("SWT GUI toolkit not available: " + e + "\n\nIf you are using platform-neutral build, make sure you provide SWT built for your platform manually (e.g. install libswt packages), or please use a platform specific binary.");
+			showFallbackError(e.toString() + "\nPlease submit a bug report mentioning your OS and what exactly were you doing.");
 		}
-		catch (Throwable e) {
-			handleFatalError(gui, e);
-		}
-	}
-
-	private static void handleFatalError(GUI gui, Throwable e) {
-		e.printStackTrace();
-		new GoogleAnalytics().report(e);
-		if (gui != null)
-			gui.showMessage(0, "Fatal Error", e + "\nPlease submit a bug report mentioning your OS and what exactly were you doing.");
-		else
-			showFallbackError(e.getMessage());
 	}
 
 	private static void showFallbackError(String message) {
@@ -130,14 +109,6 @@ public class Main {
 	}
 
 	private static void showMessageToConsole(String usageText) {
-		// check if console is attached to the process
-		if (System.console() != null) {
-			System.err.println(usageText);
-		}
-		else {
-			var dialog = new InfoDialog(Version.NAME, getLabel("title.commandline"));
-			dialog.setMessage(usageText);
-			dialog.open();
-		}
+		System.err.println(usageText);
 	}
 }

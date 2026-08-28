@@ -3,27 +3,21 @@ package net.azib.ipscan.gui.feeders;
 import net.azib.ipscan.config.Labels;
 import net.azib.ipscan.feeders.Feeder;
 import net.azib.ipscan.feeders.RangeFeeder;
-import org.eclipse.swt.widgets.Shell;
+import net.azib.ipscan.gui.fx.feeders.FXAbstractFeederGUI;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/**
- * AbstractFeederGUITest
- *
- * @author Anton Keks
- */
 public class AbstractFeederGUITest {
-	private boolean initialized;
-	private AbstractFeederGUI feederGUI;
-	
+
+	private FXAbstractFeederGUI feederGUI;
+
 	@Before
 	public void setUp() throws Exception {
-		feederGUI = new AbstractFeederGUI(new Shell()) {
+		feederGUI = new FXAbstractFeederGUI() {
 			public void initialize() {
-				initialized = true;
 			}
 			public String getFeederName() {
 				return "Mega Feeder";
@@ -44,18 +38,12 @@ public class AbstractFeederGUITest {
 	}
 
 	@Test
-	public void initializeMustBeCalledInConstructor() throws Exception {
-		assertTrue("otherwise command-line will be broken", initialized);
-	}
-
-	@Test
 	public void getInfo() {
 		assertEquals("Mega Feeder: 127.0.0.1 - 127.0.0.2", feederGUI.getInfo());
 	}
-	
+
 	@Test
 	public void serializePartsAreLabels() throws Exception {
-		// TODO: make test for each FeederGUI, extending this class
 		for (var label : feederGUI.serializePartsLabels()) {
 			Labels.getLabel(label);
 		}

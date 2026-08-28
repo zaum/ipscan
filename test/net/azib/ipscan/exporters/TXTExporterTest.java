@@ -1,7 +1,7 @@
 package net.azib.ipscan.exporters;
 
 import net.azib.ipscan.config.Version;
-import net.azib.ipscan.gui.feeders.AbstractFeederGUI;
+import net.azib.ipscan.feeders.FeederCreator;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -69,23 +69,23 @@ public class TXTExporterTest extends AbstractExporterTestCase {
 
 	@Test
 	public void importFromFile() throws Exception {
-		var file = getClass().getResource("import.txt").getPath();
-		var feederGUI = mock(AbstractFeederGUI.class);
+		var file = getClass().getResource("import.txt").toURI().getPath();
+		var feederCreator = mock(FeederCreator.class);
 
-		var results = ((TXTExporter) exporter).importResults(file, feederGUI);
+		var results = ((TXTExporter) exporter).importResults(file, feederCreator);
 
 		assertEquals(7, results.size());
-		verify(feederGUI).unserialize("192.168.0.19", "192.168.0.255");
+		verify(feederCreator).unserialize("192.168.0.19", "192.168.0.255");
 	}
 
 	@Test
 	public void importFromBrokenFile() throws Exception {
-		var file = getClass().getResource("import-broken.txt").getPath();
-		var feederGUI = mock(AbstractFeederGUI.class);
+		var file = getClass().getResource("import-broken.txt").toURI().getPath();
+		var feederCreator = mock(FeederCreator.class);
 
-		var results = ((TXTExporter) exporter).importResults(file, feederGUI);
+		var results = ((TXTExporter) exporter).importResults(file, feederCreator);
 
 		assertEquals(7, results.size());
-		verify(feederGUI).unserialize("192.168.0.19", "192.168.0.255");
+		verify(feederCreator).unserialize("192.168.0.19", "192.168.0.255");
 	}
 }
