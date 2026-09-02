@@ -18,3 +18,4 @@ Guidelines for AI coding agents and developers working on this repository (Angry
 - Code language: Java 21, JavaFX 21 UI (`src/net/azib/ipscan/gui/fx/`), Gradle build.
 - Use JDK 21 for Gradle: `JAVA_HOME=<path-to-jdk21> ./gradlew <task>` (the default `java` on PATH may be Java 8).
 - After code changes, at minimum run `./gradlew compileJava` and, when relevant, `./gradlew compileTestJava` before restarting the app.
+- Use only english in comments

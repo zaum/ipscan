@@ -16,6 +16,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.shape.Circle;
+import javafx.util.Duration;
 import net.azib.ipscan.config.*;
 import net.azib.ipscan.core.ScanningResult;
 import net.azib.ipscan.core.ScanningResult.ResultType;
@@ -24,6 +25,7 @@ import net.azib.ipscan.core.state.ScanningState;
 import net.azib.ipscan.core.state.StateMachine;
 import net.azib.ipscan.core.state.StateMachine.Transition;
 import net.azib.ipscan.core.state.StateTransitionListener;
+import net.azib.ipscan.core.ScanningSubject;
 import net.azib.ipscan.fetchers.*;
 
 import java.net.InetAddress;
@@ -75,7 +77,10 @@ public class FXResultTable implements StateTransitionListener {
         // header nodes only exist once the skin is installed, so (re)attach the auto-fit
         // handler the first time the table is laid out
         tableView.skinProperty().addListener((obs, old, skin) -> {
-            if (skin != null) installAutoFitHandler();
+            if (skin != null) {
+                installAutoFitHandler();
+                installHeaderTooltips();
+            }
         });
 
         tableView.getColumns().addListener((ListChangeListener) change -> {
@@ -471,8 +476,20 @@ public class FXResultTable implements StateTransitionListener {
 
     public void rebuildColumns() {
         Platform.runLater(() -> {
+            var oldFetchers = new ArrayList<>(currentFetchers);
             tableView.getColumns().clear();
             currentFetchers = new ArrayList<>(fetcherRegistry.getSelectedFetchers());
+            // sync model if registry changed via other paths (e.g. preferences) – toggleFetcher already synced, this is idempotent
+            if (!scanningResults.getFetchers().equals(currentFetchers)) {
+                scanningResults.syncFetchers(currentFetchers);
+            }
+            // populate newly enabled columns for existing rows (e.g. Comments) – mirrors SWT populateNewFetcher
+            var addedFetchers = currentFetchers.stream().filter(f -> !oldFetchers.contains(f)).toList();
+            for (var added : addedFetchers) {
+                if (stateMachine.inState(ScanningState.IDLE) && scanningResults.getItemCount() > 0) {
+                    populateNewFetcher(added);
+                }
+            }
 
             var ordered = new ArrayList<>(currentFetchers);
             var savedOrder = guiConfig.getColumnOrder();
@@ -509,6 +526,7 @@ public class FXResultTable implements StateTransitionListener {
 
             syncItems();
             installAutoFitHandler();
+            installHeaderTooltips();
 
             // on the first start auto-size all columns to fit their content
             if (initialAutoFitPending) {
@@ -582,6 +600,61 @@ public class FXResultTable implements StateTransitionListener {
             }
             catch (Exception ignored) {}
         });
+    }
+
+    /**
+     * Install hover tooltips on every column header showing fetcher.getInfo().
+     * Mirrors SWT ResultTable.HeaderTooltipPoller (delay 2000ms, width-capped wrapping).
+     */
+    private void installHeaderTooltips() {
+        Runnable installer = () -> {
+            try {
+                var headers = tableView.lookupAll(".column-header");
+                if (headers.isEmpty()) {
+                    // skin not yet laid out – retry shortly
+                    var pause = new javafx.animation.PauseTransition(Duration.millis(500));
+                    pause.setOnFinished(e -> installHeaderTooltips());
+                    pause.play();
+                    return;
+                }
+                for (var node : headers) {
+                    if (!(node instanceof TableColumnHeader header)) continue;
+                    var col = header.getTableColumn();
+                    if (col == null) continue;
+                    var data = col.getUserData();
+                    if (!(data instanceof Fetcher fetcher)) {
+                        // autofit button column has no fetcher -> remove any old tooltip
+                        Tooltip.install(header, null);
+                        var labelNode = header.lookup(".label");
+                        if (labelNode != null) Tooltip.install(labelNode, null);
+                        continue;
+                    }
+                    var info = fetcher.getInfo();
+                    if (info == null || info.isEmpty()) {
+                        Tooltip.install(header, null);
+                        var labelNode = header.lookup(".label");
+                        if (labelNode != null) Tooltip.install(labelNode, null);
+                        continue;
+                    }
+                    var tip = new Tooltip(info);
+                    tip.setWrapText(true);
+                    tip.setMaxWidth(360);
+                    tip.setPrefWidth(360);
+                    tip.setShowDelay(Duration.millis(2000));
+                    tip.setShowDuration(Duration.seconds(10));
+                    tip.setHideDelay(Duration.millis(200));
+                    // install on both header and its inner label so hover anywhere triggers it
+                    Tooltip.install(header, tip);
+                    var labelNode = header.lookup(".label");
+                    if (labelNode != null) Tooltip.install(labelNode, tip);
+                }
+            } catch (Exception ignored) {}
+        };
+        Platform.runLater(installer);
+        // second attempt after layout pass – covers case where skin was just created
+        var pause = new javafx.animation.PauseTransition(Duration.millis(600));
+        pause.setOnFinished(e -> Platform.runLater(installer));
+        pause.play();
     }
 
     private void autoFitColumns() {
@@ -820,6 +893,53 @@ public class FXResultTable implements StateTransitionListener {
         fetcherRegistry.updateSelectedFetchers(ids);
         scanningResults.syncFetchers(newSelection);
         rebuildColumns();
+    }
+
+    /**
+     * Runs the given fetcher for all already-scanned results so its newly added column
+     * gets filled with real data. Runs off the UI thread (batched, like SWT version).
+     */
+    private void populateNewFetcher(Fetcher fetcher) {
+        var fetcherId = fetcher.getId();
+        int position = scanningResults.getFetcherIndex(fetcherId);
+        if (position < 0) return;
+        int total = scanningResults.getItemCount();
+        if (total == 0) return;
+        new Thread(() -> {
+            try {
+                try { fetcher.init(null); } catch (Exception ignored) {}
+                final int batchSize = 100;
+                for (int batchStart = 0; batchStart < total; batchStart += batchSize) {
+                    int batchEnd = Math.min(batchStart + batchSize, total);
+                    for (int i = batchStart; i < batchEnd; i++) {
+                        ScanningResult result;
+                        try { result = scanningResults.getResult(i); } catch (Exception e) { continue; }
+                        if (result == null || !result.isReady()) continue;
+                        try {
+                            var subject = new ScanningSubject(result.getAddress());
+                            if (result.getMac() != null) subject.setParameter(MACFetcher.ID, result.getMac());
+                            Object value = fetcher.scan(subject);
+                            if (position >= 0 && position < result.getValues().size())
+                                result.setValue(position, value);
+                        } catch (Exception ignored) {}
+                    }
+                    final int start = batchStart, end = batchEnd;
+                    Platform.runLater(() -> {
+                        if (items.size() != scanningResults.getItemCount()) {
+                            syncItems();
+                        } else {
+                            for (int r = start; r < end; r++) {
+                                if (r < items.size()) {
+                                    // trigger TableView refresh for this row
+                                    items.set(r, items.get(r));
+                                }
+                            }
+                        }
+                    });
+                    try { Thread.sleep(10); } catch (InterruptedException ignored) {}
+                }
+            } catch (Exception ignored) {}
+        }, "FetcherPopulator-" + fetcherId).start();
     }
 
     public Node getNode() {
@@ -1117,7 +1237,7 @@ public class FXResultTable implements StateTransitionListener {
     }
 
     static class PortCell extends TableCell<ScanningResult, String> {
-        private final HBox box = new HBox(3);
+        private final HBox box = new HBox(4);
 
         PortCell() {
             box.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
@@ -1150,8 +1270,8 @@ public class FXResultTable implements StateTransitionListener {
             for (var port : ports) {
                 if (port.trim().isEmpty()) continue;
                 var label = new Label(port.trim());
-                label.setStyle("-fx-background-color: rgba(0,229,255,0.10); -fx-text-fill: #00E5FF; -fx-padding: 0 4 0 4; -fx-background-radius: 3; -fx-border-color: rgba(0,229,255,0.25); -fx-border-radius: 3; -fx-border-width: 1; -fx-font-size: 10;");
-                label.setMaxHeight(18);
+                label.setStyle("-fx-background-color: rgba(0,229,255,0.10); -fx-text-fill: #00E5FF; -fx-padding: 2 6 2 6; -fx-background-radius: 4; -fx-border-color: rgba(0,229,255,0.25); -fx-border-radius: 4; -fx-border-width: 1; -fx-font-size: 12;");
+                label.setMaxHeight(22);
                 box.getChildren().add(label);
             }
         }

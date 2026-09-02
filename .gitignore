@@ -8,3 +8,6 @@
 .DS_Store
 *.jar
 hs_err_pid*.log
+ipscan-start.bat
+run-ipscan.bat
+run-javafx.bat

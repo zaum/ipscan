@@ -32,6 +32,9 @@ public class FXMainWindow implements ScanningProgressCallback {
     private final StateMachine stateMachine;
 
     private Button scanButton;
+    private Label scanButtonIcon;
+    private String scanButtonFullText;
+    private String scanButtonIconChar;
     private Region activityBar;
     private TranslateTransition scanlineAnim;
     private HBox controlsBar;
@@ -132,7 +135,25 @@ public class FXMainWindow implements ScanningProgressCallback {
 
         scanButton = new Button();
         scanButton.getStyleClass().add("scan-button");
+        scanButtonIcon = new Label("\u25B6");
+        scanButtonIcon.setMouseTransparent(true);
+        scanButton.setGraphic(scanButtonIcon);
+        scanButton.setContentDisplay(javafx.scene.control.ContentDisplay.LEFT);
+        scanButton.setGraphicTextGap(6);
+        scanButton.setEllipsisString("");
+        scanButton.setMinWidth(36);
         scanButton.setOnAction(e -> handleScanClick());
+        // when narrow, show only icon – icon stays visible because graphic is not ellipsized
+        scanButton.widthProperty().addListener((obs, o, n) -> {
+            double w = n.doubleValue();
+            if (w <= 0 || scanButtonFullText == null) return;
+            boolean narrow = w < 80;
+            boolean isIconOnly = scanButton.getText().isEmpty();
+            if (narrow != isIconOnly) {
+                scanButton.setText(narrow ? "" : scanButtonFullText);
+            }
+        });
+        HBox.setHgrow(scanButton, Priority.NEVER);
         updateButtonForState(ScanningState.IDLE);
 
         feederCombo = feederRegistry.getFeederCombo();
@@ -173,15 +194,38 @@ public class FXMainWindow implements ScanningProgressCallback {
         Platform.runLater(() -> {
             scanButton.setStyle("");
             scanButton.setDisable(false);
+            String icon;
+            String label;
             if (state == ScanningState.IDLE) {
-                scanButton.setText("\u25B6 " + Labels.getLabel("button.start"));
+                icon = "\u25B6";
+                label = Labels.getLabel("button.start");
             } else if (state == ScanningState.SCANNING) {
-                scanButton.setText("\u25A0 " + Labels.getLabel("button.stop"));
+                icon = "\u25A0";
+                label = Labels.getLabel("button.stop");
                 scanButton.setStyle("-fx-text-fill: #FF4757; -fx-border-color: #FF4757; -fx-effect: dropshadow(gaussian, #FF4757, 10, 0.35, 0, 0); -fx-background-color: linear-gradient(from 0% 0% to 0% 100%, rgba(255,71,87,0.16), rgba(255,71,87,0.04));");
             } else if (state == ScanningState.STOPPING || state == ScanningState.KILLING) {
-                scanButton.setText("\u25A0 " + Labels.getLabel("button.stop"));
+                icon = "\u25A0";
+                label = Labels.getLabel("button.stop");
                 scanButton.setDisable(true);
+            } else {
+                icon = "\u25B6";
+                label = Labels.getLabel("button.start");
             }
+            scanButtonIconChar = icon;
+            scanButtonFullText = label;
+            if (scanButtonIcon != null) {
+                scanButtonIcon.setText(icon);
+                // match icon color to button text color (red when scanning)
+                if (state == ScanningState.SCANNING || state == ScanningState.STOPPING || state == ScanningState.KILLING) {
+                    scanButtonIcon.setStyle("-fx-text-fill: #FF4757;");
+                } else {
+                    scanButtonIcon.setStyle("");
+                }
+            }
+            // keep icon visible even when text is hidden: graphic is never ellipsized
+            double w = scanButton.getWidth();
+            boolean narrow = w > 0 && w < 80;
+            scanButton.setText(narrow ? "" : label);
         });
     }
 
