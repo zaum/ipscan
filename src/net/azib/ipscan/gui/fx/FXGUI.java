@@ -129,9 +129,13 @@ public class FXGUI extends Application {
             "/fonts/ChakraPetch-SemiBold.ttf"
         };
         for (var path : fonts) {
-            var stream = FXGUI.class.getResourceAsStream(path);
-            if (stream != null) {
-                javafx.scene.text.Font.loadFont(stream, -1);
+            try (var stream = FXGUI.class.getResourceAsStream(path)) {
+                if (stream != null) {
+                    javafx.scene.text.Font.loadFont(stream, -1);
+                }
+            }
+            catch (Exception e) {
+                // ignore missing/invalid font resources
             }
         }
     }
