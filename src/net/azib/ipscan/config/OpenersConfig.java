@@ -10,11 +10,6 @@ import java.util.LinkedHashMap;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
-/**
- * OpenersConfig
- *
- * @author Anton Keks
- */
 public class OpenersConfig extends NamedListConfig {
 	
 	static final Logger LOG = LoggerFactory.getLogger();
@@ -74,12 +69,12 @@ public class OpenersConfig extends NamedListConfig {
 			try {
 				var parts = serialized.split("@@@");
 				execString = parts[0];
-				inTerminal = parts[1].charAt(0) == '1';
-				workingDir = parts.length >= 3 && parts[2].length() > 0 ? new File(parts[2]) : null;
+				inTerminal = parts.length >= 2 && parts[1].length() > 0 && parts[1].charAt(0) == '1';
+				workingDir = parts.length >= 3 && !parts[2].isEmpty() ? new File(parts[2]) : null;
 			}
-			catch (ArrayIndexOutOfBoundsException e) {
-				// this happens when broken settings have been loaded
+			catch (Exception e) {
 				LOG.fine("Broken opener config read: " + serialized);
+				execString = "";
 			}
 		}
 

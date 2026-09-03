@@ -2,8 +2,8 @@ package net.azib.ipscan.config;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.Locale;
-import java.util.Random;
 import java.util.prefs.Preferences;
 
 /**
@@ -39,7 +39,7 @@ public final class Config {
 		language = preferences.get("language", "system");
 		gaClientId = preferences.get("gaClientId", null);
 		if (gaClientId == null) {
-			var random = new Random();
+			var random = new SecureRandom();
 			var firstPart = 1000000000L + (long)(random.nextDouble() * 9000000000L);
 			var secondPart = 1000000000L + (long)(random.nextDouble() * 9000000000L);
 			gaClientId = firstPart + "." + secondPart;
