@@ -13,6 +13,8 @@ import net.azib.ipscan.fetchers.FetcherRegistry;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * "Edit Openers" dialog - a JavaFX port of the SWT EditOpenersDialog.
@@ -28,6 +30,8 @@ public class FXOpenersDialog {
     private final TextField workingDirText = new TextField();
     private final CheckBox inTerminalCheck = new CheckBox(Labels.getLabel("text.openers.inTerminal"));
     private int currentSelectionIndex = -1;
+    /** working copy of the user openers; the shared OpenersConfig is only touched when OK is pressed */
+    private final Map<String, OpenersConfig.Opener> working = new LinkedHashMap<>();
 
     public FXOpenersDialog(Stage owner) {
         this.owner = owner;
@@ -45,7 +49,10 @@ public class FXOpenersDialog {
 
         listView.setPrefSize(200, 220);
         for (var name : openersConfig) {
-            if (!name.startsWith("opener.")) listView.getItems().add(name);
+            if (!name.startsWith("opener.")) {
+                listView.getItems().add(name);
+                working.put(name, openersConfig.getOpener(name));
+            }
         }
         listView.getSelectionModel().selectedIndexProperty().addListener((obs, old, idx) -> {
             if (idx.intValue() >= 0) loadFieldsForSelection();
@@ -86,8 +93,16 @@ public class FXOpenersDialog {
 
         dialog.setResultConverter(bt -> {
             if (bt == ButtonType.OK) {
-                saveCurrentFields();
-                openersConfig.update(listView.getItems().toArray(new String[0]));
+                saveCurrentFields(); // persist the currently edited fields into the working copy
+                var ordered = new ArrayList<String>();
+                for (var name : openersConfig) {
+                    if (name.startsWith("opener.")) ordered.add(name);
+                }
+                for (var name : listView.getItems()) {
+                    ordered.add(name);
+                    openersConfig.add(name, working.get(name));
+                }
+                openersConfig.update(ordered.toArray(new String[0]));
                 openersConfig.store();
             }
             return null;
@@ -116,6 +131,7 @@ public class FXOpenersDialog {
         listView.getItems().add(idx, newName);
         listView.getSelectionModel().select(idx);
         currentSelectionIndex = idx;
+        working.put(newName, new OpenersConfig.Opener("${fetcher.ip}", false, null));
         nameText.setText(newName);
         stringText.setText("${fetcher.ip}");
         workingDirText.setText("");
@@ -137,7 +153,7 @@ public class FXOpenersDialog {
         currentSelectionIndex = listView.getSelectionModel().getSelectedIndex();
         if (currentSelectionIndex < 0) return;
         var name = listView.getItems().get(currentSelectionIndex);
-        var opener = openersConfig.getOpener(name);
+        var opener = working.get(name);
         nameText.setText(name);
         if (opener != null) {
             stringText.setText(opener.execString);
@@ -149,9 +165,9 @@ public class FXOpenersDialog {
     private void saveCurrentFields() {
         if (currentSelectionIndex < 0 || currentSelectionIndex >= listView.getItems().size()) return;
         var oldName = listView.getItems().get(currentSelectionIndex);
-        var opener = openersConfig.getOpener(oldName);
         var workingDir = workingDirText.getText().length() > 0 ? new File(workingDirText.getText()) : null;
-        openersConfig.add(nameText.getText(), new OpenersConfig.Opener(stringText.getText(), inTerminalCheck.isSelected(), workingDir));
+        working.remove(oldName);
+        working.put(nameText.getText(), new OpenersConfig.Opener(stringText.getText(), inTerminalCheck.isSelected(), workingDir));
         listView.getItems().set(currentSelectionIndex, nameText.getText());
     }
 
