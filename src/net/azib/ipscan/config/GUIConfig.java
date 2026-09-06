@@ -111,21 +111,22 @@ public class GUIConfig {
 	}
 
 	/**
-	 * @return column width corresponding to a fetcher
+	 * @return the persisted width of the column corresponding to a fetcher, or 0 if none was saved yet
 	 */
 	public int getColumnWidth(Fetcher fetcher) {
-		var width = preferences.getInt("columnWidth." + fetcher.getId(), 0);
-		if (width == 0) {
-			// use different default widths
-			if (fetcher instanceof IPFetcher || fetcher instanceof HostnameFetcher)
-				width = 140;
-			else
-			if (fetcher instanceof PingFetcher)
-				width = 60;
-			else
-				width = 90;
-		}
-		return width;
+		return preferences.getInt("columnWidth." + fetcher.getId(), 0);
+	}
+
+	/**
+	 * @return the default width of a column, used only when there is no saved width
+	 *         and the table has no rows to size the column against
+	 */
+	public int getDefaultColumnWidth(Fetcher fetcher) {
+		if (fetcher instanceof IPFetcher || fetcher instanceof HostnameFetcher)
+			return 140;
+		if (fetcher instanceof PingFetcher)
+			return 60;
+		return 90;
 	}
 	
 	/**

@@ -17,10 +17,18 @@ import net.azib.ipscan.gui.ResultTable;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ColumnsActions {
 	
 	public static final class ColumnResize implements Listener {
-		private GUIConfig guiConfig;
+		/** delay after the last resize event before the width is persisted */
+		private static final int SAVE_DELAY_MS = 300;
+
+		private final GUIConfig guiConfig;
+		/** pending debounced saves per column, so only the final width gets persisted while dragging */
+		private final Map<TableColumn, Runnable> pendingSaves = new HashMap<>();
 		
 		public ColumnResize(GUIConfig guiConfig) {
 			this.guiConfig = guiConfig;
@@ -36,8 +44,24 @@ public class ColumnsActions {
 			if (Platform.LINUX && table.getColumn(lastVisualModelIndex) == column)
 				return;
 
-			// save column width
-			guiConfig.setColumnWidth((Fetcher)column.getData(), column.getWidth());
+			// debounce: reschedule the save on every resize event, persisting the width
+			// only once the user stops dragging (no resize events for SAVE_DELAY_MS)
+			var previous = pendingSaves.remove(column);
+			if (previous != null) table.getDisplay().timerExec(-1, previous);
+
+			var save = (Runnable) () -> {
+				pendingSaves.remove(column);
+				if (!column.isDisposed())
+					guiConfig.setColumnWidth((Fetcher) column.getData(), column.getWidth());
+			};
+			pendingSaves.put(column, save);
+			try {
+				table.getDisplay().timerExec(SAVE_DELAY_MS, save);
+			}
+			catch (Exception e) {
+				// display already disposed (app closing) — timers can no longer run
+				// and the column is likely gone, so there is nothing left to save
+			}
 		}
 	}
 

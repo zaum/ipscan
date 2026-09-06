@@ -230,7 +230,18 @@ import static net.azib.ipscan.gui.util.LayoutHelper.icon;
 			// the Opener Launch column centers its triangle icon
 			var style = fetcher.getId().equals(OpenerLaunchFetcher.ID) ? SWT.CENTER : SWT.NONE;
 			var tableColumn = new TableColumn(this, style);
-			tableColumn.setWidth(guiConfig.getColumnWidth(fetcher));
+			var savedWidth = guiConfig.getColumnWidth(fetcher);
+			if (savedWidth > 0) {
+				tableColumn.setWidth(savedWidth);
+			}
+			else if (getItemCount() > 0) {
+				// no saved width yet, but there are rows: size the column to fit its actual content
+				tableColumn.pack();
+			}
+			else {
+				// empty table: nothing to size against, fall back to the fetcher-type default
+				tableColumn.setWidth(guiConfig.getDefaultColumnWidth(fetcher));
+			}
 			tableColumn.setData(fetcher);	// this is used in some listeners in ColumnsActions
 			tableColumn.setText(fetcher.getFullName());  // set the header name immediately while the column is freshly created
 			// IP column is never movable; others only when not scanning
