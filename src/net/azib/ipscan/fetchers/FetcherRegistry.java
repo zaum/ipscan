@@ -123,6 +123,15 @@ public class FetcherRegistry {
 	}
 
   /**
+   * Checks whether a fetcher with the given id is registered at all.
+   * Useful for distinguishing a typo in a fetcher reference from a fetcher
+   * that is registered but not currently selected.
+   */
+	public boolean isRegisteredFetcher(String id) {
+		return registeredFetchers.containsKey(id);
+	}
+
+  /**
    * Updates the list, retaining only items that are passed in the array.
    * The order of elements will be the same as in the array.
    */
